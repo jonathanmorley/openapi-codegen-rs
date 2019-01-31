@@ -1,0 +1,79 @@
+use std::borrow::Borrow;
+
+use failure;
+use hyper;
+use serde_json;
+
+use super::request as _internal_request;
+use super::configuration;
+use super::configuration::Configuration;
+
+pub struct {{pascal_id}}ApiClient {
+    configuration: Configuration,
+}
+
+impl {{pascal_id}}ApiClient {
+    pub fn new(configuration: Configuration) -> Self {
+        Self {
+            configuration: configuration,
+        }
+    }
+
+    {{~#each methods}}
+
+    pub fn r#{{snake_id}}(
+        &self,
+        {{~#each path_parameters}}
+        r#{{snake_id}}: {{type}},{{/each}}
+        {{~#each query_parameters}}
+        r#{{snake_id}}: {{type}},{{/each}}
+        {{~#if body}}
+        r#{{body.snake_id}}: {{body.type}},{{/if}}
+    ) -> Result<{{#if returns}}{{returns}}{{else}}(){{/if}}, failure::Error> {
+        _internal_request::Request::new(
+            hyper::Method::{{http_method}},
+            "{{path}}".to_string(),
+        )
+        {{~#each path_parameters}}
+        .with_path_param("{{api_id}}".to_string(), r#{{snake_id}}.to_string()){{/each}}
+        {{~#each query_parameters}}
+        .with_query_param("{{api_id}}".to_string(), r#{{snake_id}}.to_string()){{/each}}{{#if body}}
+        .with_body_param(r#{{body.snake_id}}){{/if}}{{#unless returns}}
+        .returns_nothing(){{/unless}}
+        .execute(self.configuration.borrow())
+    }{{/each}}
+}
+
+#[cfg(test)]
+mod tests {
+    use super::configuration::Configuration;
+    use testcontainers::*;
+    use tc_core::{Container, Image};
+    use tc_generic::{GenericImage, WaitFor};
+
+    {{~#each methods}}
+    #[test]
+    fn r#{{snake_id}}() {
+        client().r#{{snake_id}}(
+          {{~#each path_parameters}}
+          {{test_value}},{{/each}}
+          {{~#each query_parameters}}
+          {{test_value}},{{/each}}
+          {{~#if body}}
+          {{body.test_value}},{{/if}}
+        ).unwrap();
+    }
+
+    {{/each}}
+
+    fn client() -> super::{{pascal_id}}ApiClient {
+        let docker = clients::Cli::default();
+        let image = GenericImage::new("okta-apisprout:latest")
+            .with_wait_for(WaitFor::message_on_stdout("Sprouting"));
+        let server = docker.run(image);
+        let host_port = server.get_host_port(8000).unwrap();
+        let url = format!("http://localhost:{}", host_port);
+        let configuration = Configuration::new(url);
+        super::{{pascal_id}}ApiClient::new(configuration)
+    }
+}

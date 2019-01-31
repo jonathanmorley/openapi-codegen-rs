@@ -1,0 +1,26 @@
+#[allow(unused_imports)]
+use serde_json::Value;
+
+use std::borrow::Borrow;
+
+#[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct r#{{pascal_id}}({{inner.type}});
+
+impl r#{{pascal_id}} {
+    pub fn new(inner: {{inner.type}}) -> Self {
+        Self(inner)
+    }
+
+    pub fn set_inner(&mut self, inner: {{inner.type}}) {
+        self.0 = inner;
+    }
+
+    pub fn with_inner(mut self, inner: {{inner.type}}) -> Self {
+        self.0 = inner;
+        self
+    }
+
+    pub fn inner(&self) -> {{inner.borrowed_type}} {
+        self.0.borrow()
+    }
+}

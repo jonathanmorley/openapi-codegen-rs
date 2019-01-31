@@ -1,0 +1,10 @@
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
+pub enum r#{{pascal_id}} {
+    {{~#each variants}}
+    #[serde(rename = "{{api_id}}")]
+    r#{{pascal_id}},{{/each}}
+}
+
+impl Default for r#{{pascal_id}} {
+    fn default() -> Self { r#{{pascal_id}}::{{variants.0.pascal_id}} }
+}

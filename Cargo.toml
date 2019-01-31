@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "openapi-codegen",
+    "tests/openapi-examples"
+]

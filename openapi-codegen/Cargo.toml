@@ -1,0 +1,16 @@
+[package]
+name = "openapi-codegen"
+version = "0.1.0"
+authors = ["Morley, Jonathan <morley.jonathan@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+openapiv3 = { git = "https://github.com/jonathanmorley/openapiv3", branch = "pub-format" }
+failure = "0.1"
+handlebars = "1"
+heck = "0.3"
+serde = "1"
+serde_derive = "1"
+regex = "1"
+lazy_static = "*"
+serde_yaml = "*"

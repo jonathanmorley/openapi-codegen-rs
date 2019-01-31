@@ -1,0 +1,62 @@
+#[allow(unused_imports)]
+use serde_json::Value;
+
+use std::borrow::Borrow;
+
+#[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
+pub struct r#{{pascal_id}} {
+    {{~#each optional_fields}}
+    #[serde(rename = "{{api_id}}", skip_serializing_if = "Option::is_none")]
+    r#{{snake_id}}: Option<{{type}}>,{{/each}}
+    {{~#each required_fields}}
+    #[serde(rename = "{{api_id}}")]
+    r#{{snake_id}}: {{type}},{{/each}}
+}
+
+impl r#{{pascal_id}} {
+    pub fn new(
+        {{~#each required_fields}}
+        r#{{snake_id}}: {{type}},{{/each}}
+    ) -> Self {
+        Self {
+          {{~#each optional_fields}}
+          r#{{snake_id}}: None,{{/each}}
+          {{~#each required_fields}}
+          r#{{snake_id}}: {{snake_id}},{{/each}}
+        }
+    }
+
+    {{~#each optional_fields}}
+
+    pub fn set_{{snake_id}}(&mut self, r#{{snake_id}}: {{type}}) {
+        self.r#{{snake_id}} = Some(r#{{snake_id}});
+    }
+
+    pub fn with_{{snake_id}}(mut self, r#{{snake_id}}: {{type}}) -> Self {
+        self.r#{{snake_id}} = Some(r#{{snake_id}});
+        self
+    }
+
+    pub fn r#{{snake_id}}(&self) -> Option<{{borrowed_type}}> {
+        self.r#{{snake_id}}.as_ref().map(|x| x.borrow())
+    }
+
+    pub fn reset_{{snake_id}}(&mut self) {
+        self.r#{{snake_id}} = None;
+    }{{/each}}
+
+    {{~#each required_fields}}
+
+    pub fn set_{{snake_id}}(&mut self, r#{{snake_id}}: {{type}}) {
+        self.r#{{snake_id}} = r#{{snake_id}};
+    }
+
+    pub fn with_{{snake_id}}(mut self, r#{{snake_id}}: {{type}}) -> Self {
+        self.r#{{snake_id}} = r#{{snake_id}};
+        self
+    }
+
+    pub fn r#{{snake_id}}(&self) -> {{borrowed_type}} {
+        self.r#{{snake_id}}.borrow()
+    }{{/each}}
+}
