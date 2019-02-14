@@ -10,6 +10,7 @@ pub struct Api {
     pub snake_id: RustSnakeIdentifier,
     pub pascal_id: RustPascalIdentifier,
     pub methods: Vec<Method>, // Will be vec<Method>
+    pub tests: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -40,7 +41,10 @@ impl From<&openapiv3::ParameterData> for Parameter {
             snake_id: parameter_data.name.to_owned().into(),
             test_value: match r#type.0.as_str() {
                 "String" => format!("\"{}\".into()", parameter_data.name),
-                "Vec<String>" => format!("vec![\"{}1\".into(), \"{}2\".into()]", parameter_data.name, parameter_data.name),
+                "Vec<String>" => format!(
+                    "vec![\"{}1\".into(), \"{}2\".into()]",
+                    parameter_data.name, parameter_data.name
+                ),
                 t => format!("{}::default()", t),
             },
             r#type,

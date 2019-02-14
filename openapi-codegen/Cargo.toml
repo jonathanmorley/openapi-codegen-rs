@@ -5,7 +5,7 @@ authors = ["Morley, Jonathan <morley.jonathan@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-openapiv3 = { git = "https://github.com/jonathanmorley/openapiv3", branch = "pub-format" }
+openapiv3 = { git = "https://github.com/glademiller/openapiv3", branch = "master" }
 failure = "0.1"
 handlebars = "1"
 heck = "0.3"

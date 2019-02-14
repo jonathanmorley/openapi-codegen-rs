@@ -2,11 +2,15 @@ use std::borrow::Borrow;
 
 use failure;
 use hyper;
-use serde_json;
+
+#[allow(unused_imports)]
+use serde_json::Value;
 
 use super::request as _internal_request;
-use super::configuration;
 use super::configuration::Configuration;
+
+#[allow(unused_imports)]
+use super::super::models::*;
 
 pub struct {{pascal_id}}ApiClient {
     configuration: Configuration,
@@ -18,7 +22,6 @@ impl {{pascal_id}}ApiClient {
             configuration: configuration,
         }
     }
-
     {{~#each methods}}
 
     pub fn r#{{snake_id}}(
@@ -44,12 +47,15 @@ impl {{pascal_id}}ApiClient {
     }{{/each}}
 }
 
+{{#if tests}}
 #[cfg(test)]
 mod tests {
-    use super::configuration::Configuration;
-    use testcontainers::*;
+    use super::*;
+
+    #[allow(unused_imports)]
     use tc_core::{Container, Image};
     use tc_generic::{GenericImage, WaitFor};
+    use testcontainers::*;
 
     {{~#each methods}}
     #[test]
@@ -68,7 +74,7 @@ mod tests {
 
     fn client() -> super::{{pascal_id}}ApiClient {
         let docker = clients::Cli::default();
-        let image = GenericImage::new("okta-apisprout:latest")
+        let image = GenericImage::new("test-apisprout:latest")
             .with_wait_for(WaitFor::message_on_stdout("Sprouting"));
         let server = docker.run(image);
         let host_port = server.get_host_port(8000).unwrap();
@@ -77,3 +83,4 @@ mod tests {
         super::{{pascal_id}}ApiClient::new(configuration)
     }
 }
+{{/if}}

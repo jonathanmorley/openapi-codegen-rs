@@ -2,11 +2,15 @@ use std::borrow::Borrow;
 
 use failure;
 use hyper;
-use serde_json;
+
+#[allow(unused_imports)]
+use serde_json::Value;
 
 use super::request as _internal_request;
-use super::configuration;
 use super::configuration::Configuration;
+
+#[allow(unused_imports)]
+use super::super::models::*;
 
 pub struct UntaggedApiClient {
     configuration: Configuration,
@@ -42,12 +46,15 @@ impl UntaggedApiClient {
     }
 }
 
+
 #[cfg(test)]
 mod tests {
-    use super::configuration::Configuration;
-    use testcontainers::*;
+    use super::*;
+    
+    #[allow(unused_imports)]
     use tc_core::{Container, Image};
     use tc_generic::{GenericImage, WaitFor};
+    use testcontainers::*;
     #[test]
     fn r#list_versionsv2() {
         client().r#list_versionsv2(
@@ -74,3 +81,4 @@ mod tests {
         super::UntaggedApiClient::new(configuration)
     }
 }
+

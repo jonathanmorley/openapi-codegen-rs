@@ -8,9 +8,9 @@ use openapiv3::Operation;
 use openapiv3::Parameter;
 use openapiv3::PathItem;
 use openapiv3::ReferenceOr;
+use serde_derive::Serialize;
 use serde_yaml;
 use std::collections::HashSet;
-use std::env;
 use std::fs::{DirBuilder, File};
 use std::io::Write;
 use std::path::Path;
@@ -18,11 +18,7 @@ use std::path::Path;
 mod api;
 mod model;
 
-pub fn build_client(api_path: &str) -> Result<(), Error> {
-    client(api_path, &env::var("OUT_DIR")?)
-}
-
-pub fn client(api_path: &str, output_dir: &str) -> Result<(), Error> {
+pub fn client(api_path: &str, output_dir: &str, tests: bool) -> Result<(), Error> {
     let mut reg = Handlebars::new();
     reg.register_escape_fn(handlebars::no_escape);
     reg.register_template_string("api_mod", include_str!("resources/api_mod.mustache"))?;
@@ -54,7 +50,7 @@ pub fn client(api_path: &str, output_dir: &str) -> Result<(), Error> {
     let mut request = File::create(&dest_path.join("apis/request.rs"))?;
     request.write_all(include_bytes!("resources/request.rs"))?;
 
-    let apis = spec_apis(&spec);
+    let apis = spec_apis(&spec, tests);
 
     let api_mod = File::create(&dest_path.join("apis/mod.rs"))?;
     reg.render_to_write("api_mod", &apis, api_mod)?;
@@ -73,46 +69,50 @@ pub fn client(api_path: &str, output_dir: &str) -> Result<(), Error> {
         None => vec![],
     };
 
-    if !&models.is_empty() {
-        let models_path = dest_path.join("models");
-        DirBuilder::new().recursive(true).create(&models_path)?;
+    let models_path = dest_path.join("models");
+    DirBuilder::new().recursive(true).create(&models_path)?;
 
-        let models_mod = File::create(models_path.join("mod.rs"))?;
-        reg.render_to_write("model_mod", &models, models_mod)?;
+    let models_mod = File::create(models_path.join("mod.rs"))?;
+    reg.render_to_write("model_mod", &models, models_mod)?;
 
-        for model in &models {
-            match model {
-                DataType::Struct(_struct) => {
-                    let model = File::create(models_path.join(format!("{}.rs", _struct.snake_id)))?;
-                    reg.render_to_write("model_struct", &_struct, model)?;
-                }
-                DataType::NewType(_enum) => {
-                    let model = File::create(models_path.join(format!("{}.rs", _enum.snake_id)))?;
-                    reg.render_to_write("model_newtype", &_enum, model)?;
-                }
-                DataType::Enum(_enum) => {
-                    let model = File::create(models_path.join(format!("{}.rs", _enum.snake_id)))?;
-                    reg.render_to_write("model_enum", &_enum, model)?;
-                }
+    for model in &models {
+        match model {
+            DataType::Struct(_struct) => {
+                let model = File::create(models_path.join(format!("{}.rs", _struct.snake_id)))?;
+                reg.render_to_write("model_struct", &_struct, model)?;
+            }
+            DataType::NewType(newtype) => {
+                let model = File::create(models_path.join(format!("{}.rs", newtype.snake_id)))?;
+                reg.render_to_write("model_newtype", &newtype, model)?;
+            }
+            DataType::Enum(_enum) => {
+                let model = File::create(models_path.join(format!("{}.rs", _enum.snake_id)))?;
+                reg.render_to_write("model_enum", &_enum, model)?;
             }
         }
     }
 
-    let mut modules = Vec::new();
-    if !apis.is_empty() {
-        modules.push("apis")
-    }
-    if !models.is_empty() {
-        modules.push("models")
-    }
+    let mod_file = if output_dir == "src" {
+        File::create(dest_path.join("lib.rs"))?
+    } else {
+        File::create(dest_path.join("mod.rs"))?
+    };
 
-    let r#mod = File::create(dest_path.join("mod.rs"))?;
-    reg.render_to_write("mod", &modules, r#mod)?;
+    let r#mod = Mod {
+        root: output_dir == "src",
+    };
+
+    reg.render_to_write("mod", &r#mod, mod_file)?;
 
     Ok(())
 }
 
-fn spec_apis(spec: &OpenAPI) -> Vec<Api> {
+#[derive(Debug, Serialize)]
+struct Mod {
+    root: bool,
+}
+
+fn spec_apis(spec: &OpenAPI, tests: bool) -> Vec<Api> {
     paths_tags(spec)
         .into_iter()
         .map(|tag| Api {
@@ -128,13 +128,14 @@ fn spec_apis(spec: &OpenAPI) -> Vec<Api> {
                     operations_methods(path, reference_or_operations)
                 })
                 .collect(),
+            tests,
         })
         .collect()
 }
 
 fn operations_methods(path: &str, reference_or_operations: &ReferenceOr<PathItem>) -> Vec<Method> {
     match reference_or_operations {
-        ReferenceOr::Reference { reference } => unimplemented!(),
+        ReferenceOr::Reference { .. } => unimplemented!(),
         ReferenceOr::Item(operations) => {
             let options =
                 vec![
@@ -164,8 +165,9 @@ fn operation_method(method: String, path: String, operation: &Operation) -> Meth
     Method {
         snake_id: match operation.operation_id.as_ref() {
             Some(operation_id) => operation_id.to_owned(),
-            None => format!("{}/{}", method, path)
-        }.into(),
+            None => format!("{}/{}", method, path),
+        }
+        .into(),
         path: path,
         http_method: method,
         path_parameters: operation
@@ -235,7 +237,7 @@ fn paths_tags(spec: &OpenAPI) -> HashSet<Option<String>> {
 
 fn operations_tags(reference_or_operations: &ReferenceOr<PathItem>) -> Vec<Option<String>> {
     match reference_or_operations {
-        ReferenceOr::Reference { reference } => unimplemented!(),
+        ReferenceOr::Reference { .. } => unimplemented!(),
         ReferenceOr::Item(operations) => {
             let mut tags = operation_tags(operations.get.as_ref());
             tags.append(&mut operation_tags(operations.post.as_ref()));

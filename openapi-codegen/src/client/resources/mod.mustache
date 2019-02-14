@@ -1,2 +1,5 @@
-{{#each this}}pub mod {{this}};
-{{/each~}}
+{{#if root}}#[macro_use]
+extern crate serde_derive;{{/if}}
+
+pub mod apis;
+pub mod models;

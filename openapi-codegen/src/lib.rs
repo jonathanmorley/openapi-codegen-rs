@@ -1,6 +1,5 @@
 pub mod client;
 
-pub use client::build_client;
 pub use client::client;
 use heck::{CamelCase, SnakeCase};
 use lazy_static::lazy_static;
@@ -129,7 +128,7 @@ impl From<&ReferenceOr<Box<SchemaV3>>> for RustType {
                     .trim_start_matches("#/components/schemas/")
                     .trim_start_matches("#/components/requestBodies/")
                     .to_camel_case();
-                RustType(format!("super::super::models::{}", type_name))
+                RustType(format!("{}", type_name))
             }
             ReferenceOr::Item(schema) => match schema.borrow() {
                 SchemaV3::Schema(schema_variant) => {
@@ -161,7 +160,7 @@ impl From<&ReferenceOr<SchemaV3>> for RustType {
                     .trim_start_matches("#/components/schemas/")
                     .trim_start_matches("#/components/requestBodies/")
                     .to_camel_case();
-                RustType(format!("super::super::models::{}", type_name))
+                RustType(format!("{}", type_name))
             }
             ReferenceOr::Item(schema) => match schema {
                 SchemaV3::Schema(schema_variant) => {
@@ -188,7 +187,7 @@ impl From<&ReferenceOr<SchemaV3>> for RustType {
 impl From<&ParameterData> for RustType {
     fn from(parameter_data: &ParameterData) -> RustType {
         match &parameter_data.format {
-            openapiv3::ParameterSchemaOrContent::Content(content) => unimplemented!(),
+            openapiv3::ParameterSchemaOrContent::Content(_) => unimplemented!(),
             openapiv3::ParameterSchemaOrContent::Schema(ref reference_or_schema) => {
                 reference_or_schema.into()
             }
@@ -199,11 +198,13 @@ impl From<&ParameterData> for RustType {
 impl From<&ReferenceOr<RequestBody>> for RustType {
     fn from(reference_or_requestbody: &ReferenceOr<RequestBody>) -> RustType {
         match reference_or_requestbody {
-            ReferenceOr::Reference { reference } => RustType(
-                reference
-                    .replace("#/components/schemas/", "crate::models::")
-                    .replace("#/components/requestBodies/", "crate::models::"),
-            ),
+            ReferenceOr::Reference { reference } => {
+                let type_name = reference
+                    .trim_start_matches("#/components/schemas/")
+                    .trim_start_matches("#/components/requestBodies/")
+                    .to_camel_case();
+                RustType(format!("{}", type_name))
+            }
             ReferenceOr::Item(requestbody) => match requestbody.content.get("application/json") {
                 Some(mediatype) => match mediatype.schema {
                     Some(ref reference_or_schema) => reference_or_schema.into(),

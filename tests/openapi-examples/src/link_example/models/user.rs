@@ -3,6 +3,9 @@ use serde_json::Value;
 
 use std::borrow::Borrow;
 
+#[allow(unused_imports)]
+use super::*;
+
 #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct r#User {
     #[serde(rename = "username", skip_serializing_if = "Option::is_none")]

@@ -15,7 +15,7 @@ pub enum DataType {
 impl From<(String, ReferenceOr<Schema>)> for DataType {
     fn from((name, reference_or_schema): (String, ReferenceOr<Schema>)) -> Self {
         match reference_or_schema {
-            ReferenceOr::Reference { reference } => unimplemented!(),
+            ReferenceOr::Reference { .. } => unimplemented!(),
             ReferenceOr::Item(item) => match item {
                 Schema::Any(any_schema) => {
                     DataType::Struct((name, any_schema.borrow() as &AnySchema).into())

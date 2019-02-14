@@ -1,11 +1,9 @@
-use std::collections::HashMap;
+use super::configuration;
 
-use super::{configuration, Error};
-use futures;
-use futures::Future;
 use hyper;
 use serde;
 use serde_json;
+use std::collections::HashMap;
 
 pub(crate) struct ApiKey {
     pub in_header: bool,
@@ -22,6 +20,7 @@ impl ApiKey {
     }
 }
 
+#[allow(dead_code)]
 pub(crate) enum Auth {
     None,
     ApiKey(ApiKey),
@@ -57,36 +56,43 @@ impl Request {
         }
     }
 
+    #[allow(dead_code)]
     pub fn with_body_param<T: serde::Serialize>(mut self, param: T) -> Self {
         self.serialized_body = Some(serde_json::to_string(&param).unwrap());
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_header_param(mut self, basename: String, param: String) -> Self {
         self.header_params.insert(basename, param);
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_query_param(mut self, basename: String, param: String) -> Self {
         self.query_params.insert(basename, param);
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_path_param(mut self, basename: String, param: String) -> Self {
         self.path_params.insert(basename, param);
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_form_param(mut self, basename: String, param: String) -> Self {
         self.form_params.insert(basename, param);
         self
     }
 
+    #[allow(dead_code)]
     pub fn returns_nothing(mut self) -> Self {
         self.no_return_type = true;
         self
     }
 
+    #[allow(dead_code)]
     pub fn with_auth(mut self, auth: Auth) -> Self {
         self.auth = auth;
         self
@@ -160,10 +166,7 @@ impl Request {
             req = req.header("Content-Type", "application/json").body(body);
         }
 
-        let mut resp = req.send()?;
-        //dbg!(&resp.text());
-        //unimplemented!()
-        resp.error_for_status().map_err(|e| e.into())
+        req.send()?.error_for_status().map_err(|e| e.into())
     }
 
     pub fn execute<'a, U>(self, conf: &configuration::Configuration) -> Result<U, failure::Error>

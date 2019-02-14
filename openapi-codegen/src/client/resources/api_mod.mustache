@@ -48,7 +48,7 @@ impl<T> From<serde_json::Error> for Error<T> {
     }
 }
 
-mod request;
+pub mod request;
 pub mod configuration;
 {{#each this~}}
 mod {{snake_id}}_api;

@@ -3,14 +3,17 @@ use serde_json::Value;
 
 use std::borrow::Borrow;
 
+#[allow(unused_imports)]
+use super::*;
+
 #[derive(Debug, Default, Serialize, Deserialize, PartialEq)]
 pub struct r#Pullrequest {
     #[serde(rename = "author", skip_serializing_if = "Option::is_none")]
-    r#author: Option<super::super::models::User>,
+    r#author: Option<User>,
     #[serde(rename = "id", skip_serializing_if = "Option::is_none")]
     r#id: Option<i32>,
     #[serde(rename = "repository", skip_serializing_if = "Option::is_none")]
-    r#repository: Option<super::super::models::Repository>,
+    r#repository: Option<Repository>,
     #[serde(rename = "title", skip_serializing_if = "Option::is_none")]
     r#title: Option<String>,
 }
@@ -26,16 +29,16 @@ impl r#Pullrequest {
         }
     }
 
-    pub fn set_author(&mut self, r#author: super::super::models::User) {
+    pub fn set_author(&mut self, r#author: User) {
         self.r#author = Some(r#author);
     }
 
-    pub fn with_author(mut self, r#author: super::super::models::User) -> Self {
+    pub fn with_author(mut self, r#author: User) -> Self {
         self.r#author = Some(r#author);
         self
     }
 
-    pub fn r#author(&self) -> Option<&super::super::models::User> {
+    pub fn r#author(&self) -> Option<&User> {
         self.r#author.as_ref().map(|x| x.borrow())
     }
 
@@ -60,16 +63,16 @@ impl r#Pullrequest {
         self.r#id = None;
     }
 
-    pub fn set_repository(&mut self, r#repository: super::super::models::Repository) {
+    pub fn set_repository(&mut self, r#repository: Repository) {
         self.r#repository = Some(r#repository);
     }
 
-    pub fn with_repository(mut self, r#repository: super::super::models::Repository) -> Self {
+    pub fn with_repository(mut self, r#repository: Repository) -> Self {
         self.r#repository = Some(r#repository);
         self
     }
 
-    pub fn r#repository(&self) -> Option<&super::super::models::Repository> {
+    pub fn r#repository(&self) -> Option<&Repository> {
         self.r#repository.as_ref().map(|x| x.borrow())
     }
 

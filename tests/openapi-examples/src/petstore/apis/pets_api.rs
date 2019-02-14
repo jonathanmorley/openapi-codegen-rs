@@ -2,11 +2,15 @@ use std::borrow::Borrow;
 
 use failure;
 use hyper;
-use serde_json;
+
+#[allow(unused_imports)]
+use serde_json::Value;
 
 use super::request as _internal_request;
-use super::configuration;
 use super::configuration::Configuration;
+
+#[allow(unused_imports)]
+use super::super::models::*;
 
 pub struct PetsApiClient {
     configuration: Configuration,
@@ -22,7 +26,7 @@ impl PetsApiClient {
     pub fn r#list_pets(
         &self,
         r#limit: i32,
-    ) -> Result<super::super::models::Pets, failure::Error> {
+    ) -> Result<Pets, failure::Error> {
         _internal_request::Request::new(
             hyper::Method::GET,
             "/pets".to_string(),
@@ -45,7 +49,7 @@ impl PetsApiClient {
     pub fn r#show_pet_by_id(
         &self,
         r#pet_id: String,
-    ) -> Result<super::super::models::Pets, failure::Error> {
+    ) -> Result<Pets, failure::Error> {
         _internal_request::Request::new(
             hyper::Method::GET,
             "/pets/{petId}".to_string(),
@@ -55,44 +59,4 @@ impl PetsApiClient {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::configuration::Configuration;
-    use testcontainers::*;
-    use tc_core::{Container, Image};
-    use tc_generic::{GenericImage, WaitFor};
-    #[test]
-    fn r#list_pets() {
-        client().r#list_pets(
-          i32::default(),
-        ).unwrap();
-    }
 
-    
-    #[test]
-    fn r#create_pets() {
-        client().r#create_pets(
-        ).unwrap();
-    }
-
-    
-    #[test]
-    fn r#show_pet_by_id() {
-        client().r#show_pet_by_id(
-          "petId".into(),
-        ).unwrap();
-    }
-
-    
-
-    fn client() -> super::PetsApiClient {
-        let docker = clients::Cli::default();
-        let image = GenericImage::new("okta-apisprout:latest")
-            .with_wait_for(WaitFor::message_on_stdout("Sprouting"));
-        let server = docker.run(image);
-        let host_port = server.get_host_port(8000).unwrap();
-        let url = format!("http://localhost:{}", host_port);
-        let configuration = Configuration::new(url);
-        super::PetsApiClient::new(configuration)
-    }
-}
