@@ -12,42 +12,41 @@ use super::configuration::Configuration;
 #[allow(unused_imports)]
 use super::super::models::*;
 
-pub struct {{pascal_id}}ApiClient {
+pub struct UntaggedApiClient {
     configuration: Configuration,
 }
 
-impl {{pascal_id}}ApiClient {
+impl UntaggedApiClient {
     pub fn new(configuration: Configuration) -> Self {
         Self {
             configuration: configuration,
         }
     }
-    {{~#each methods}}
 
-    pub fn r#{{snake_id}}(
+    pub fn r#list_versionsv2(
         &self,
-        {{~#each path_parameters}}
-        r#{{snake_id}}: {{type}},{{/each}}
-        {{~#each query_parameters}}
-        r#{{snake_id}}: {{type}},{{/each}}
-        {{~#if body}}
-        r#{{body.snake_id}}: {{body.type}},{{/if}}
-    ) -> Result<{{#if returns}}{{returns}}{{else}}(){{/if}}, failure::Error> {
+    ) -> Result<(), failure::Error> {
         _internal_request::Request::new(
-            hyper::Method::{{http_method}},
-            "{{path}}".to_string(),
+            hyper::Method::GET,
+            "/".to_string(),
         )
-        {{~#each path_parameters}}
-        .with_path_param("{{api_id}}".to_string(), r#{{snake_id}}.to_string()){{/each}}
-        {{~#each query_parameters}}
-        .with_query_param("{{api_id}}".to_string(), r#{{snake_id}}.to_string()){{/each}}{{#if body}}
-        .with_body_param(r#{{body.snake_id}}){{/if}}{{#unless returns}}
-        .returns_nothing(){{/unless}}
+        .returns_nothing()
         .execute(self.configuration.borrow())
-    }{{/each}}
+    }
+
+    pub fn r#get_version_detailsv2(
+        &self,
+    ) -> Result<(), failure::Error> {
+        _internal_request::Request::new(
+            hyper::Method::GET,
+            "/v2".to_string(),
+        )
+        .returns_nothing()
+        .execute(self.configuration.borrow())
+    }
 }
 
-{{#if tests}}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -56,23 +55,22 @@ mod tests {
     use tc_core::{Container, Image};
     use tc_generic::{GenericImage, WaitFor};
     use testcontainers::*;
-
-    {{~#each methods}}
     #[test]
-    fn r#{{snake_id}}() {
-        client().r#{{snake_id}}(
-          {{~#each path_parameters}}
-          {{test_value}},{{/each}}
-          {{~#each query_parameters}}
-          {{test_value}},{{/each}}
-          {{~#if body}}
-          {{body.test_value}},{{/if}}
+    fn r#list_versionsv2() {
+        client().r#list_versionsv2(
         ).unwrap();
     }
 
-    {{/each}}
+    
+    #[test]
+    fn r#get_version_detailsv2() {
+        client().r#get_version_detailsv2(
+        ).unwrap();
+    }
 
-    fn client() -> super::{{pascal_id}}ApiClient {
+    
+
+    fn client() -> super::UntaggedApiClient {
         std::process::Command::new("docker")
                   .args(&["build", "-t=test-apisprout", "."])
                   .output()
@@ -85,7 +83,7 @@ mod tests {
         let host_port = server.get_host_port(8000).unwrap();
         let url = format!("http://localhost:{}", host_port);
         let configuration = Configuration::new(url);
-        super::{{pascal_id}}ApiClient::new(configuration)
+        super::UntaggedApiClient::new(configuration)
     }
 }
-{{/if}}
+

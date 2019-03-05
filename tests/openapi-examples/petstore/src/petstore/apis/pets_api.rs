@@ -12,42 +12,54 @@ use super::configuration::Configuration;
 #[allow(unused_imports)]
 use super::super::models::*;
 
-pub struct {{pascal_id}}ApiClient {
+pub struct PetsApiClient {
     configuration: Configuration,
 }
 
-impl {{pascal_id}}ApiClient {
+impl PetsApiClient {
     pub fn new(configuration: Configuration) -> Self {
         Self {
             configuration: configuration,
         }
     }
-    {{~#each methods}}
 
-    pub fn r#{{snake_id}}(
+    pub fn r#list_pets(
         &self,
-        {{~#each path_parameters}}
-        r#{{snake_id}}: {{type}},{{/each}}
-        {{~#each query_parameters}}
-        r#{{snake_id}}: {{type}},{{/each}}
-        {{~#if body}}
-        r#{{body.snake_id}}: {{body.type}},{{/if}}
-    ) -> Result<{{#if returns}}{{returns}}{{else}}(){{/if}}, failure::Error> {
+        r#limit: i32,
+    ) -> Result<Pets, failure::Error> {
         _internal_request::Request::new(
-            hyper::Method::{{http_method}},
-            "{{path}}".to_string(),
+            hyper::Method::GET,
+            "/pets".to_string(),
         )
-        {{~#each path_parameters}}
-        .with_path_param("{{api_id}}".to_string(), r#{{snake_id}}.to_string()){{/each}}
-        {{~#each query_parameters}}
-        .with_query_param("{{api_id}}".to_string(), r#{{snake_id}}.to_string()){{/each}}{{#if body}}
-        .with_body_param(r#{{body.snake_id}}){{/if}}{{#unless returns}}
-        .returns_nothing(){{/unless}}
+        .with_query_param("limit".to_string(), r#limit.to_string())
         .execute(self.configuration.borrow())
-    }{{/each}}
+    }
+
+    pub fn r#create_pets(
+        &self,
+    ) -> Result<(), failure::Error> {
+        _internal_request::Request::new(
+            hyper::Method::POST,
+            "/pets".to_string(),
+        )
+        .returns_nothing()
+        .execute(self.configuration.borrow())
+    }
+
+    pub fn r#show_pet_by_id(
+        &self,
+        r#pet_id: String,
+    ) -> Result<Pets, failure::Error> {
+        _internal_request::Request::new(
+            hyper::Method::GET,
+            "/pets/{petId}".to_string(),
+        )
+        .with_path_param("petId".to_string(), r#pet_id.to_string())
+        .execute(self.configuration.borrow())
+    }
 }
 
-{{#if tests}}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -56,23 +68,31 @@ mod tests {
     use tc_core::{Container, Image};
     use tc_generic::{GenericImage, WaitFor};
     use testcontainers::*;
-
-    {{~#each methods}}
     #[test]
-    fn r#{{snake_id}}() {
-        client().r#{{snake_id}}(
-          {{~#each path_parameters}}
-          {{test_value}},{{/each}}
-          {{~#each query_parameters}}
-          {{test_value}},{{/each}}
-          {{~#if body}}
-          {{body.test_value}},{{/if}}
+    fn r#list_pets() {
+        client().r#list_pets(
+          i32::default(),
         ).unwrap();
     }
 
-    {{/each}}
+    
+    #[test]
+    fn r#create_pets() {
+        client().r#create_pets(
+        ).unwrap();
+    }
 
-    fn client() -> super::{{pascal_id}}ApiClient {
+    
+    #[test]
+    fn r#show_pet_by_id() {
+        client().r#show_pet_by_id(
+          "petId".into(),
+        ).unwrap();
+    }
+
+    
+
+    fn client() -> super::PetsApiClient {
         std::process::Command::new("docker")
                   .args(&["build", "-t=test-apisprout", "."])
                   .output()
@@ -85,7 +105,7 @@ mod tests {
         let host_port = server.get_host_port(8000).unwrap();
         let url = format!("http://localhost:{}", host_port);
         let configuration = Configuration::new(url);
-        super::{{pascal_id}}ApiClient::new(configuration)
+        super::PetsApiClient::new(configuration)
     }
 }
-{{/if}}
+

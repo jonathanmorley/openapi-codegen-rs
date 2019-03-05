@@ -2,5 +2,10 @@
 
 members = [
     "openapi-codegen",
-    "tests/openapi-examples"
+    "tests/openapi-examples/api-with-examples",
+    "tests/openapi-examples/callback-example",
+    "tests/openapi-examples/link-example",
+    "tests/openapi-examples/petstore",
+    #"tests/openapi-examples/petstore-expanded",
+    #"tests/openapi-examples/uspto"
 ]
