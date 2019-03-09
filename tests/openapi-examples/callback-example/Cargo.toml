@@ -15,7 +15,7 @@ base64 = "0.10"
 futures = "0.1"
 tokio-core = "0.1"
 reqwest = "0.9"
-failure = "*"
+failure = "0.1"
 
 [build-dependencies]
 openapi-codegen = { path = "../../../openapi-codegen" }

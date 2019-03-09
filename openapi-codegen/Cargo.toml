@@ -5,12 +5,12 @@ authors = ["Morley, Jonathan <morley.jonathan@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-openapiv3 = { git = "https://github.com/glademiller/openapiv3" }
+openapiv3 = "0.1"
 failure = "0.1"
 handlebars = "1"
 heck = "0.3"
 serde = "1"
 serde_derive = "1"
+serde_yaml = "0.8"
 regex = "1"
-lazy_static = "*"
-serde_yaml = "*"
+lazy_static = "1"
