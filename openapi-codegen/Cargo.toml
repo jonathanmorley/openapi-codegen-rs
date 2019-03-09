@@ -3,6 +3,8 @@ name = "openapi-codegen"
 version = "0.1.0"
 authors = ["Morley, Jonathan <morley.jonathan@gmail.com>"]
 edition = "2018"
+description = "Automatically generate rust HTTP clients from OpenAPI files."
+license = "Apache-2.0"
 
 [dependencies]
 openapiv3 = "0.1"
