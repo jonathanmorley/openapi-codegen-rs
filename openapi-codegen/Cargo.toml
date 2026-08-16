@@ -7,7 +7,7 @@ description = "Automatically generate rust HTTP clients from OpenAPI files."
 license = "Apache-2.0"
 
 [dependencies]
-openapiv3 = "0.1"
+openapiv3 = "0.5"
 failure = "0.1"
 handlebars = "1"
 heck = "0.3"
