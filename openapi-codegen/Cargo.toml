@@ -9,7 +9,7 @@ license = "Apache-2.0"
 [dependencies]
 openapiv3 = "0.1"
 failure = "0.1"
-handlebars = "1"
+handlebars = "6"
 heck = "0.3"
 serde = "1"
 serde_derive = "1"
